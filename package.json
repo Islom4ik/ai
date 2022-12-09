@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "cleverbot-free": "^1.1.11",
+    "dotenv": "^16.0.3",
+    "mongodb": "^4.12.1",
+    "telegraf": "^4.11.2"
+  },
+  "name": "moderation-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
