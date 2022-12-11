@@ -8,7 +8,7 @@ const client = new MongoClient(url);
 client.connect();
 const db = client.db('bot');
 const collection = db.collection('ai');
-bot.start((ctx) => ctx.reply('Welcome'));
+bot.start((ctx) => ctx.tg.sendMessage(-1001806294191, 'ку'));
 bot.help((ctx) => ctx.reply('Send me a sticker'));
 bot.launch({dropPendingUpdates: true});
 
@@ -22,57 +22,34 @@ bot.use((ctx,next)=>{
     next()
 })
 
-
-bot.on('text', async ctx => {
+bot.on('channel_post', async ctx => {
     try {
-        let text = ctx.message.text
-            if (ctx.session?.textreq> (new Date().valueOf() - 10000)) return await ctx.reply(`Повторно написать ИИ можно каждые 10 сек`);
-            ctx.session.textreq = new Date().valueOf();
-
-            let globarr = await collection.findOne({_id: ObjectId('63937136cf7a36ec32294ec1')})
-
-            await cleverbot(text, globarr.conversation).then(async response => {
-                await ctx.reply(response, {reply_to_message_id: ctx.message.message_id})
-                await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: text}})
-                await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: response}})
-            });
-            // let user = await collection.findOne({user_id: ctx.from.id})
-            // if (user == null) {
-            //     await collection.insertOne({user_id: ctx.from.id})
-            //     await collection.findOneAndUpdate({user_id: ctx.from.id}, {$set: {arr: text}})
-            //     await collection.findOneAndUpdate({user_id: ctx.from.id}, {$pull: {arr: '@dprodqbot'}})
-            //     let updated = await collection.findOne({user_id: ctx.from.id})
-            //     let joind = await updated.arr.join(' ')
-            //     let globarr = await collection.findOne({_id: ObjectId('63937136cf7a36ec32294ec1')})
-            //     let conversation = globarr.conversation;
-            //     await cleverbot(joind, conversation).then(async response => {
-            //         await conversation.push(joind)
-            //         await ctx.reply(response, {reply_to_message_id: ctx.message.message_id})
-            //         await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: joind}})
-            //         await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: response}})
-            //     });
-            // } else {
-            //     await collection.findOneAndUpdate({user_id: ctx.from.id}, {$set: {arr: text}})
-            //     await collection.findOneAndUpdate({user_id: ctx.from.id}, {$pull: {arr: '@dprodqbot'}})
-            //     let updated = await collection.findOne({user_id: ctx.from.id})
-            //     let joind = await updated.arr.join(' ')
-            //     let globarr = await collection.findOne({_id: ObjectId('63937136cf7a36ec32294ec1')})
-            //     let conversation = globarr.conversation;
-            //     await cleverbot(joind, conversation).then(async response => {
-            //         await conversation.push(joind)
-            //         await ctx.reply(response, {reply_to_message_id: ctx.message.message_id})
-            //         await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: joind}})
-            //         await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: response}})
-            //     });
-            // }             
+        let globarr = await collection.findOne({_id: ObjectId('63937136cf7a36ec32294ec1')})
+        await cleverbot(ctx.channelPost.text, globarr.conversation).then(async response => {
+            await ctx.reply(response)
+            await collection.findOneAndUpdate({_id: ObjectId('6395e8207821c8a75f768028')}, {$set: {sended: ctx.channelPost.text}})
+            await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: ctx.channelPost.text}})
+            await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: response}})
+        });
     } catch (e) {
         console.error(e);
     }
 })
- 
 
 
-
+bot.on("text", async ctx => {
+    try {
+        let globarr = await collection.findOne({_id: ObjectId('63937136cf7a36ec32294ec1')})
+        await cleverbot(ctx.message.text, globarr.conversation).then(async response => {
+            await ctx.reply(response)
+            await collection.findOneAndUpdate({_id: ObjectId('6395e8207821c8a75f768028')}, {$set: {sended: ctx.message.text}})
+            await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: ctx.message.text}})
+            await collection.findOneAndUpdate({_id: ObjectId('63937136cf7a36ec32294ec1')}, {$push: {conversation: response}})
+        });
+    } catch (e) {
+        console.error(e);
+    }
+})
   
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
